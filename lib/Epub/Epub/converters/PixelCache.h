@@ -56,7 +56,11 @@ struct PixelCache {
   PixelCache& operator=(const PixelCache&) = delete;
 
   static constexpr int MIN_BAND_ROWS = 16;
-  static constexpr size_t MAX_BAND_BYTES = 24 * 1024;  // band working-set ceiling
+#if defined(BOARD_HAS_PSRAM)
+  static constexpr size_t MAX_BAND_BYTES = 24 * 1024;  // band working-set ceiling with PSRAM
+#else
+  static constexpr size_t MAX_BAND_BYTES = 8 * 1024;   // 8KB ceiling to conserve internal SRAM on C3
+#endif
 
   // Open the cache file, write the header, and allocate a band buffer big enough
   // to hold the tallest single decode block (maxBlockDstRows output rows).
@@ -89,8 +93,17 @@ struct PixelCache {
     }
     bandRows = wantRows;
 
-    const size_t bufSize = (size_t)(bandRows + 1) * bytesPerRow;  // +1 spare zero row
+    size_t bufSize = (size_t)(bandRows + 1) * bytesPerRow;  // +1 spare zero row
     buffer = (uint8_t*)malloc(bufSize);
+    if (!buffer && bandRows > maxBlockDstRows + 2) {
+      // Low-memory fallback: shrink to minimal required rows for the single MCU block
+      bandRows = maxBlockDstRows + 2;
+      bufSize = (size_t)(bandRows + 1) * bytesPerRow;
+      buffer = (uint8_t*)malloc(bufSize);
+      if (buffer) {
+        LOG_INF("IMG", "Cache band reduced to %d rows (%u bytes) to prevent OOM", bandRows, (unsigned)bufSize);
+      }
+    }
     if (!buffer) {
       LOG_ERR("IMG", "OOM cache band: %u bytes", (unsigned)bufSize);
       return false;

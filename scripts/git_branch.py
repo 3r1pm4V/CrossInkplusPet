@@ -142,9 +142,9 @@ def get_production_version(project_dir):
 
 def get_hardware_version(project_dir, pioenv):
     if pioenv == 'default':
-        return 'v0.11'
+        return 'v0.12'
     if pioenv == 'x4-classic':
-        return 'v0.11-x4-classic'
+        return 'v0.12-x4-classic'
     base_version = get_crossink_version(project_dir)
     return f'v{base_version}'
 

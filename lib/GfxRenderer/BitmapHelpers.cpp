@@ -6,10 +6,10 @@
 #include "Bitmap.h"
 
 // Brightness/Contrast adjustments:
-constexpr bool USE_BRIGHTNESS = false;       // true: apply brightness/gamma adjustments
-constexpr int BRIGHTNESS_BOOST = 10;         // Brightness offset (0-50)
-constexpr bool GAMMA_CORRECTION = false;     // Gamma curve (brightens midtones)
-constexpr float CONTRAST_FACTOR = 1.15f;     // Contrast multiplier (1.0 = no change, >1 = more contrast)
+constexpr bool USE_BRIGHTNESS = true;        // true: apply brightness/gamma adjustments
+constexpr int BRIGHTNESS_BOOST = 6;          // Slight brightness offset for clean e-paper
+constexpr bool GAMMA_CORRECTION = true;      // Gamma curve (brightens midtones for e-ink)
+constexpr float CONTRAST_FACTOR = 1.20f;     // Contrast multiplier (20% boost for crisp black & white)
 constexpr bool USE_NOISE_DITHERING = false;  // Hash-based noise dithering
 
 // Integer approximation of gamma correction (brightens midtones)
@@ -32,15 +32,19 @@ static inline int applyGamma(int gray) {
 // factor > 1.0 increases contrast, < 1.0 decreases
 static inline int applyContrast(int gray) {
   // Integer-based contrast: (gray - 128) * factor + 128
-  // Using fixed-point: factor 1.15 ≈ 115/100
+  // Using fixed-point: factor 1.20 ≈ 120/100
   constexpr int factorNum = static_cast<int>(CONTRAST_FACTOR * 100);
   int adjusted = ((gray - 128) * factorNum) / 100 + 128;
   if (adjusted < 0) adjusted = 0;
   if (adjusted > 255) adjusted = 255;
   return adjusted;
 }
-// Combined brightness/contrast/gamma adjustment
+// Combined brightness/contrast/gamma adjustment with E-Ink clamping
 int adjustPixel(int gray) {
+  // Clamp extreme darks and lights for crisp E-Ink paper appearance
+  if (gray <= 35) return 0;
+  if (gray >= 235) return 255;
+
   if (!USE_BRIGHTNESS) return gray;
 
   // Order: contrast first, then brightness, then gamma
@@ -49,6 +53,9 @@ int adjustPixel(int gray) {
   if (gray > 255) gray = 255;
   if (gray < 0) gray = 0;
   gray = applyGamma(gray);
+
+  if (gray <= 35) return 0;
+  if (gray >= 235) return 255;
 
   return gray;
 }
