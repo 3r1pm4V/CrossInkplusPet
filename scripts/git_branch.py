@@ -141,23 +141,12 @@ def get_production_version(project_dir):
 
 
 def get_hardware_version(project_dir, pioenv):
-    if os.environ.get('CROSSINK_RC_HASH'):
-        return get_release_candidate_version(project_dir)
-
     if pioenv == 'default':
-        if os.environ.get('CROSSINK_RELEASE_VERSION'):
-            return get_production_version(project_dir)
-        base_version = get_crossink_version(project_dir)
-        branch = get_git_branch(project_dir)
-        return f'{base_version}-dev+{branch}'
-
-    base_version = (
-        get_production_version(project_dir)
-        if os.environ.get('CROSSINK_RELEASE_VERSION')
-        else get_crossink_version(project_dir)
-    )
-    device_suffix = {'sticky': '-sticky', 'x4-pro': '-x4-pro', 'x4-classic': '-x4-classic'}[pioenv]
-    return f'{base_version}{device_suffix}'
+        return 'v0.11'
+    if pioenv == 'x4-classic':
+        return 'v0.11-x4-classic'
+    base_version = get_crossink_version(project_dir)
+    return f'v{base_version}'
 
 
 def inject_version(env):
