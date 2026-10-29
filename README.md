@@ -12,18 +12,13 @@
 
 ---
 
-## 📌 Quy ước phiên bản (Versioning Scheme)
+## 📝 Nhật ký thay đổi (Changelog - v0.11)
 
-Để người dùng và lập trình viên dễ dàng theo dõi nguồn gốc và mức độ thay đổi, dự án áp dụng quy ước đánh số phiên bản như sau:
-* **Phiên bản cơ sở bắt đầu:** `0.1` (CrossInk 1.6.1 + Virtual Pet tích hợp).
-* **Cập nhật từ CrossInk gốc:** Mỗi lần đồng bộ, tải về và cập nhật phiên bản mới từ thượng nguồn [uxjulia/CrossInk](https://github.com/uxjulia/CrossInk) sẽ **cộng `+0.1`** vào version (ví dụ: `0.1` $\to$ `0.2` $\to$ `0.3`...).
-* **Tối ưu hoá / Custom tweaks:** Mỗi lần bổ sung tối ưu nội bộ (tăng tốc độ tải file EPUB, giảm RAM, cải tiến bố cục, vá lỗi riêng...) sẽ **cộng `+0.01`** vào version (ví dụ: `0.10` $\to$ `0.11` $\to$ `0.12`...).
-* **Phiên bản hiện tại: `v0.11`**:
-  * Tích hợp toàn diện Thú ảo đọc sách trên nền CrossInk 1.6.1.
-  * Lược bỏ hoàn toàn bloatware (trò chơi, công cụ thừa) để tối ưu RAM và Flash.
-  * Tối ưu bộ nhớ đệm EPUB Spine theo cấu trúc Cửa sổ trượt (Sliding Window Cache), giảm RAM tiêu thụ xuống chỉ ~128 bytes ngay cả với sách hàng nghìn chương.
-  * Bổ sung streaming `InflateReader`, `WordStore` layout arena và bộ ngắt dòng CJK Unicode UAX#14.
-  * Hỗ trợ đầy đủ cho cả **Xteink X3** và **Xteink X4 Classic**.
+* **Tích hợp Thú Ảo đọc sách (Virtual Pet):** Đưa toàn bộ cơ chế thú ảo rèn luyện thói quen đọc sách lên nền tảng **CrossInk v1.6.1** mới nhất.
+* **Loại bỏ Bloatware:** Xóa hoàn toàn các công cụ, máy tính và mini-game thừa thãi, tối ưu hóa tối đa RAM và bộ nhớ Flash.
+* **Tối ưu hóa EPUB cực đại (Sliding Window Cache):** Giảm mức RAM tĩnh khi duyệt metadata chương sách xuống chỉ ~128 bytes (ngay cả với sách hàng nghìn chương), triệt tiêu lỗi tràn RAM (OOM) trên ESP32.
+* **Tăng tốc hiển thị & bố cục:** Tích hợp bộ cấp phát token chữ `WordStore` dạng arena tránh phân mảnh heap, streaming `InflateReader` giải nén ảnh/nội dung mượt mà, hỗ trợ ngắt dòng CJK theo chuẩn Unicode UAX#14.
+* **Hỗ trợ 2 thiết bị:** Hỗ trợ chính thức cả **Xteink X3** và **Xteink X4 Classic**.
 
 ---
 
@@ -31,10 +26,10 @@
 
 | Thiết bị | Vi điều khiển (MCU) | Màn hình | Điều khiển | Tên file Firmware |
 |---|---|---|---|---|
-| **Xteink X3** | ESP32-C3 (RISC-V) | 3.52" E-Ink (360x240) | Phím cứng | `crosspet_x3_v0.11.bin` |
-| **Xteink X4 Classic** | ESP32-S3 (Xtensa Dual-Core) | 4.2" E-Ink (800x480) | Phím cứng (6 phím) | `crosspet_x4_classic_v0.11.bin` |
+| **Xteink X3** | ESP32-C3 (RISC-V) | 3.97" E-Ink (792x528, ~300 PPI) | Phím cứng (4 phím mặt trước) | `crosspet_x3_v0.11.bin` |
+| **Xteink X4 Classic** | ESP32-S3R8 (Xtensa Dual-Core, 8MB PSRAM) | 4.2" E-Ink (800x480, ~220 PPI) | Phím cứng (2 phím cạnh + 4 phím trước) | `crosspet_x4_classic_v0.11.bin` |
 
-*Ghi chú: Bản X4 Pro (màn hình cảm ứng / frontlight) hiện không nằm trong danh sách hỗ trợ của bản build này.*
+> ⚠️ **Lưu ý:** Bản **X4 Pro** (có màn hình cảm ứng Touch và đèn nền Frontlight) hiện **chưa** được hỗ trợ trong bản build này.
 
 ---
 
