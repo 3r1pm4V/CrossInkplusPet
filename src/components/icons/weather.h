@@ -3,7 +3,7 @@
 
 // Weather condition icons — 32x32 monochrome bitmaps (128 bytes each)
 // Bit convention: 1 = white (background/transparent), 0 = black (drawn pixel)
-// Row-major, MSB first (same as PetIcon format in pet.h)
+// Row-major, MSB first
 // Each row = 4 bytes (32 bits). Total: 32 rows x 4 bytes = 128 bytes.
 
 static constexpr int WEATHER_ICON_SIZE = 32;

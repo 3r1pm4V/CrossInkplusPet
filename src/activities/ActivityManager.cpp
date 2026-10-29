@@ -42,7 +42,6 @@
 #include "reader/ReaderActivity.h"
 #include "settings/OpdsServerListActivity.h"
 #include "settings/SettingsActivity.h"
-#include "tools/VirtualPetActivity.h"
 #include "util/FrontlightPanelActivity.h"
 #include "util/FullScreenMessageActivity.h"
 #include "util/SwipeAdjustment.h"
@@ -937,9 +936,6 @@ void ActivityManager::goToNearbyStatsSync() {
 }
 
 
-void ActivityManager::goToVirtualPet() {
-  replaceActivity(std::make_unique<VirtualPetActivity>(renderer, mappedInput));
-}
 
 void ActivityManager::goToSettings(const bool dismissOnUpSwipe) {
   preferredHomeBookPath.clear();

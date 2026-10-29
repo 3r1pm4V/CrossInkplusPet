@@ -82,8 +82,6 @@ inline esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause() { return ESP_SLEEP_
 
 #include "AppVersion.h"
 #include "CrossPointSettings.h"
-#include "CrossPetSettings.h"
-#include "pet/PetManager.h"
 #include "CrossPointState.h"
 #include "GlobalActions.h"
 #include "KOReaderCredentialStore.h"
@@ -1346,9 +1344,6 @@ void setup() {
   HalSystem::checkPanic();
 
   SETTINGS.loadFromFile();
-  PET_SETTINGS.loadFromFile();
-  PET_MANAGER.load();
-  PET_MANAGER.tick();
   Storage.installDateTimeCallback(&SETTINGS.clockUtcOffsetQ);
   APP_STATE.loadFromFile();
   mirrorWakeShortPressToNvs();

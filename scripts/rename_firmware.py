@@ -147,9 +147,9 @@ def rename_firmware(source, target, env):
         release_dst = os.path.join(build_dir, f'firmware-{device_type}-{release_version}.bin')
         _copy_artifact(src, release_dst)
 
-    # PetInk standardized binary export
+    # CrossImple standardized binary export: <firmware>_<model>_<version>.bin
     dev_name = 'x3' if env['PIOENV'] == 'default' else ('x4-classic' if env['PIOENV'] == 'x4-classic' else device_type)
-    root_dst = os.path.abspath(os.path.join(project_dir, '..', '..', f'petink_{dev_name}_v0.11.bin'))
+    root_dst = os.path.abspath(os.path.join(project_dir, '..', '..', f'crossimple_{dev_name}_v0.11.bin'))
     _copy_artifact(src, root_dst)
 
 
