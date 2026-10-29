@@ -27,6 +27,7 @@
 #include "activities/boot_sleep/ImageFolderIndex.h"
 #include "activities/reader/EpubReaderActivity.h"
 #include "activities/settings/SettingsActivity.h"
+#include "activities/settings/SdFirmwareUpdateActivity.h"
 #include "activities/util/ConfirmationActivity.h"
 #include "activities/util/KeyboardEntryActivity.h"
 #include "activities/util/OptionSelectionActivity.h"
@@ -117,7 +118,7 @@ bool hasFileMetadata(const std::string& path) {
 }
 
 bool isSupportedBrowserFile(std::string_view filename) {
-  return FsHelpers::hasEpubExtension(filename) || FsHelpers::hasXtcExtension(filename) ||
+  return FsHelpers::checkFileExtension(filename, ".bin") || FsHelpers::hasEpubExtension(filename) || FsHelpers::hasXtcExtension(filename) ||
          FsHelpers::hasTxtExtension(filename) || FsHelpers::hasMarkdownExtension(filename) ||
          FsHelpers::hasBmpExtension(filename) || FsHelpers::hasPngExtension(filename);
 }
@@ -1048,6 +1049,8 @@ void FileBrowserActivity::activateSelected() {
   }
   if (isDirectory) {
     requestUpdate();
+  } else if (FsHelpers::checkFileExtension(fullPath, ".bin")) {
+    activityManager.pushActivity(std::make_unique<SdFirmwareUpdateActivity>(renderer, mappedInput, false, fullPath));
   } else {
     onSelectBook(fullPath);
   }

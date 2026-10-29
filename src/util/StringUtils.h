@@ -4,6 +4,7 @@
 #include <string>
 
 namespace StringUtils {
+void formatReadingDuration(char* buf, size_t size, uint32_t secs);
 
 constexpr size_t kDefaultMaxFilenameBytes = 150;
 

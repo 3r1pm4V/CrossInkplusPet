@@ -150,6 +150,7 @@ class ActivityManager {
   bool goToNearbyBookSend(std::string path, bool returnToReader);
   void goToNearbyBookReceive();
   void goToSettings(bool dismissOnUpSwipe = false);
+  void goToVirtualPet();
   void goToFileBrowser(std::string path = {});
   void goToLibrary();
   void goToBrowser();

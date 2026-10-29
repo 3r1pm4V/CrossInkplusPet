@@ -28,8 +28,11 @@ class SdFirmwareUpdateActivity : public Activity {
     FAILED,
   };
 
-  explicit SdFirmwareUpdateActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, bool recoveryMode = false)
-      : Activity("SdFirmwareUpdate", renderer, mappedInput), recoveryMode(recoveryMode) {}
+  explicit SdFirmwareUpdateActivity(GfxRenderer& renderer, MappedInputManager& mappedInput, bool recoveryMode = false,
+                                    std::string initialPath = "")
+      : Activity("SdFirmwareUpdate", renderer, mappedInput),
+        recoveryMode(recoveryMode),
+        firmwarePath(std::move(initialPath)) {}
 
   void onEnter() override;
   void loop() override;

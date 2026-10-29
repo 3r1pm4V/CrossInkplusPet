@@ -102,6 +102,7 @@ class HomeActivity final : public Activity {
   void onContinueReading();
   void onLibraryOpen();
   void onSettingsOpen();
+  void onVirtualPetOpen();
   void onFileTransferOpen();
   void onOpdsBrowserOpen();
   void onReadingStatsOpen();

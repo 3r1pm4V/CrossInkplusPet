@@ -231,15 +231,7 @@ def inject_version(env):
         scoped.append(('CROSSINK_VERSION', f'\\"{version_string}\\"'))
         print(f'CrossInk RC build version: {version_string}')
 
-    # Keep changing source identity out of unrelated compile commands.
-    if hasattr(env, 'AddBuildMiddleware'):
-        def add_build_info_defines(node_env, node):
-            build_env = node_env.Clone()
-            build_env.Append(CPPDEFINES=scoped)
-            return build_env.Object(node)
-        env.AddBuildMiddleware(add_build_info_defines, '*src/util/BuildInfo.cpp')
-    else:
-        env.Append(CPPDEFINES=scoped)
+    env.Append(CPPDEFINES=scoped)
 
 
 # PlatformIO/SCons entry point — Import and env are SCons builtins injected at runtime.
