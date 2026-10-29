@@ -551,43 +551,53 @@ bool BookMetadataCache::load() {
     return false;
   }
 
-  cacheSpineCumulativeSizes();
+  // Spine entries follow the LUTs in index order; keep every SIZE_WINDOW-th cumulative size.
+  windowStarts.clear();
+  bookSize = 0;
+  windowFirst = -1;
+  windowStarts.reserve((spineCount + SIZE_WINDOW - 1) / SIZE_WINDOW);
+  const uint32_t lutSize = (static_cast<uint32_t>(spineCount) + tocCount) * sizeof(uint32_t);
+  bookFile.seek(lutOffset + lutSize);
+  for (uint16_t i = 0; i < spineCount; i++) {
+    if (i % SIZE_WINDOW == 0) windowStarts.push_back(bookSize);
+    bookSize = readSpineEntry(bookFile).cumulativeSize;
+  }
+
   loaded = true;
   return true;
 }
 
-void BookMetadataCache::cacheSpineCumulativeSizes() {
-  cumulativeSizes.reset();
-  cumulativeSizeCount = 0;
-  if (!cacheCumulativeSizes || spineCount == 0 || spineCount > MAX_CACHED_CUMULATIVE_SIZES) {
-    return;
+bool BookMetadataCache::fillWindow(const int first) const {
+  windowFirst = -1;
+  // Own handle: getSpineEntry() moves bookFile.
+  HalFile file;
+  uint32_t pos = 0;
+  const auto u32 = [&file](uint32_t& v) { return file.read(&v, sizeof(v)) == static_cast<int>(sizeof(v)); };
+  bool ok = Storage.openFileForRead("BMC", cachePath + bookBinFile, file) &&
+            file.seek(lutOffset + sizeof(uint32_t) * first) && u32(pos) && file.seek(pos);
+  if (!ok) return false;
+  const int n = std::min(SIZE_WINDOW, spineCount - first);
+  for (int i = 0; i < n; i++) {
+    SpineEntry e = readSpineEntry(file);
+    window[i] = e.cumulativeSize;
   }
+  windowFirst = first;
+  return ok;
+}
 
-  auto sizes = makeUniqueNoThrow<uint32_t[]>(spineCount);
-  if (!sizes) {
-    LOG_DBG("BMC", "Could not allocate %u-byte cumulative size cache; using SD lookups",
-            static_cast<unsigned>(spineCount * sizeof(uint32_t)));
-    return;
+int BookMetadataCache::getSpineIndexForSize(const uint32_t size) const {
+  if (!loaded || spineCount == 0 || size > bookSize) return -1;
+  // windowStarts[w] is the total through item w * SIZE_WINDOW - 1, so the answer lies in the window
+  // before the first start that reaches `size`. Its last total comes from RAM and always reaches it.
+  const auto next = std::lower_bound(windowStarts.begin() + 1, windowStarts.end(), size);
+  const int first = static_cast<int>(std::distance(windowStarts.begin(), next) - 1) * SIZE_WINDOW;
+  const int last = std::min(first + SIZE_WINDOW, static_cast<int>(spineCount));
+  // A read failure returns the window's last item -- guaranteed to have a cumulative size >= `size`, as before.
+  if (windowFirst != first && !fillWindow(first)) return last;
+  for (int i = first; i < last; i++) {
+    if (window[i - first] >= size) return i;
   }
-
-  const uint32_t lutSize = (static_cast<uint32_t>(spineCount) + tocCount) * sizeof(uint32_t);
-  if (!bookFile.seek(lutOffset + lutSize)) {
-    LOG_DBG("BMC", "Could not seek to spine data for cumulative size cache; using SD lookups");
-    return;
-  }
-
-  for (uint16_t i = 0; i < spineCount; ++i) {
-    uint32_t hrefLen = 0;
-    int16_t tocIndex = -1;
-    if (!serialization::tryReadPod(bookFile, hrefLen) || !bookFile.seekCur(hrefLen) ||
-        !serialization::tryReadPod(bookFile, sizes[i]) || !serialization::tryReadPod(bookFile, tocIndex)) {
-      LOG_DBG("BMC", "Could not populate cumulative size cache; using SD lookups");
-      return;
-    }
-  }
-
-  cumulativeSizes = std::move(sizes);
-  cumulativeSizeCount = spineCount;
+  return last;
 }
 
 BookMetadataCache::SpineEntry BookMetadataCache::getSpineEntry(const int index) {
@@ -610,33 +620,17 @@ BookMetadataCache::SpineEntry BookMetadataCache::getSpineEntry(const int index) 
 }
 
 size_t BookMetadataCache::getSpineCumulativeSize(const int index) {
-  if (!loaded) {
-    LOG_ERR("BMC", "getSpineCumulativeSize called but cache not loaded");
+  if (!loaded || index < 0 || index >= static_cast<int>(spineCount)) {
     return 0;
   }
-
-  if (index < 0 || index >= static_cast<int>(spineCount)) {
-    LOG_ERR("BMC", "getSpineCumulativeSize index %d out of range", index);
-    return 0;
-  }
-
-  if (index < static_cast<int>(cumulativeSizeCount)) {
-    return cumulativeSizes[index];
-  }
-
-  // Seek to spine LUT item, then read only the cumulative size field from the entry.
-  bookFile.seek(lutOffset + sizeof(uint32_t) * index);
-  uint32_t spineEntryPos;
-  serialization::readPod(bookFile, spineEntryPos);
-  bookFile.seek(spineEntryPos);
-
-  uint32_t hrefLen = 0;
-  serialization::readPod(bookFile, hrefLen);
-  bookFile.seekCur(hrefLen);
-
-  uint32_t cumulativeSize = 0;
-  serialization::readPod(bookFile, cumulativeSize);
-  return static_cast<size_t>(cumulativeSize);
+  // Window edges come from RAM, so a page at a window's first item does not read the one before.
+  if (index == static_cast<int>(spineCount) - 1) return bookSize;
+  const int first = index / SIZE_WINDOW * SIZE_WINDOW;
+  if (index - first == SIZE_WINDOW - 1) return windowStarts[index / SIZE_WINDOW + 1];
+  // An item within the window needs the window itself populated. When the window cannot be read
+  // (e.g. disk read error), return the best known lower bound: the start total before the window.
+  if (windowFirst != first && !fillWindow(first)) return windowStarts[index / SIZE_WINDOW];
+  return window[index - first];
 }
 
 BookMetadataCache::TocEntry BookMetadataCache::getTocEntry(const int index) {

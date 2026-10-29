@@ -55,12 +55,13 @@ class BookMetadataCache {
   uint16_t tocCount;
   bool loaded;
   bool buildMode;
-  bool cacheCumulativeSizes;
-
-  // Optional reader-session cache. Lightweight metadata-only callers leave this
-  // disabled so Recent Books does not pay steady-state RAM for a few lookups.
-  std::unique_ptr<uint32_t[]> cumulativeSizes;
-  uint16_t cumulativeSizeCount = 0;
+  // Cumulative spine sizes stay in book.bin; RAM holds every SIZE_WINDOW-th one and one window.
+  static constexpr int SIZE_WINDOW = 32;
+  std::vector<uint32_t> windowStarts;  // total before item w * SIZE_WINDOW
+  uint32_t bookSize = 0;
+  mutable int windowFirst = -1;
+  mutable uint32_t window[SIZE_WINDOW] = {};
+  bool fillWindow(int first) const;
 
   HalFile bookFile;
   // Temp file handles during build
@@ -111,7 +112,6 @@ class BookMetadataCache {
         tocCount(0),
         loaded(false),
         buildMode(false),
-        cacheCumulativeSizes(cacheCumulativeSizes),
         spineHrefIndex(spineHrefIndexArena) {}
   ~BookMetadataCache() = default;
 
@@ -138,6 +138,7 @@ class BookMetadataCache {
   bool failedForLowMemory() const { return lowMemoryFailure; }
   SpineEntry getSpineEntry(int index);
   size_t getSpineCumulativeSize(int index);
+  int getSpineIndexForSize(uint32_t size) const;
   TocEntry getTocEntry(int index);
   int getSpineCount() const { return spineCount; }
   int getTocCount() const { return tocCount; }
