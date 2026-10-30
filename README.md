@@ -40,6 +40,18 @@
 
 ---
 
+### Phiên bản v0.1 (Khởi đầu - CrossPet v1.6.1)
+* **Xây dựng trên nền tảng CrossInk v1.6.1:** Fork trực tiếp từ bản phát hành ổn định v1.6.1 của CrossInk.
+* **Nâng cấp tính năng Flash Firmware từ thẻ nhớ SD (`SdFirmwareUpdateActivity` & `FileBrowserActivity`):**
+  * Hỗ trợ duyệt và chọn trực tiếp file `.bin` bất kỳ trong trình quản lý tệp (File Browser) để kiểm tra tính toàn vẹn (mã băm SHA256, chip ESP32, tag phần cứng) và tiến hành nạp ngay firmware mà không cần bắt buộc đổi tên file thành `update.bin`.
+* **Dọn dẹp hệ thống (Tối ưu Flash & Giao diện):**
+  * Loại bỏ các công cụ và trò chơi cũ thừa thãi (Tools & Games cũ) để tiết kiệm bộ nhớ Flash và làm gọn menu chính.
+* **Tối ưu hóa đa ngôn ngữ:**
+  * Bổ sung và hoàn thiện bản dịch tiếng Việt (`vietnamese.yaml`) cho toàn bộ các màn hình, menu cài đặt và thông báo hệ thống.
+* **Tích hợp thử nghiệm Virtual Pet:** Thử nghiệm module nuôi thú ảo đồng bộ với tiến độ đọc sách (đã được gỡ bỏ hoàn toàn từ bản v0.11 để chuyển thành máy đọc sách thuần khiết CrossImple).
+
+---
+
 ## 📱 Thiết bị hỗ trợ (Supported Devices)
 
 | Thiết bị | Vi điều khiển (MCU) | Màn hình | Điều khiển | Tên file Firmware xuất ra |
