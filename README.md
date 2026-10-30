@@ -12,18 +12,31 @@
 
 ---
 
-## 📝 Nhật ký thay đổi (Changelog - v0.12)
+## 📝 Nhật ký thay đổi (Changelog)
 
-* **Hỗ trợ chính thức Xteink X4 Pro:**
-  * Bổ sung bản build dành riêng cho **Xteink X4 Pro** hỗ trợ đầy đủ màn hình cảm ứng điện dung (Capacitive Touch), phím Home cảm ứng và đèn nền 2 màu Warm/Cool PWM.
-* **Nâng cấp thuật toán Dithering & Độ tương phản E-Ink (Stock Parity):**
-  * Tích hợp ma trận **8x8 Fine Bayer Dithering** (64 mức chuyển tiếp mịn) thay thế ma trận 4x4 cũ, loại bỏ hoàn toàn các vệt sọc ô vuông / mắt lưới thô trên hình ảnh.
-  * **E-Ink Optical Clamping:** Ép ngưỡng đen (`<= 45`) thành đen đặc tuyệt đối và ép ngưỡng trắng (`>= 225`) thành trắng giấy sạch tinh, triệt tiêu hiện tượng dither chấm li ti làm bẩn nền giấy và giúp viền chữ/nét vẽ manga đậm nét như firmware stock.
-  * Kích hoạt Gamma Correction và bộ lọc tương phản 1.20x cho bìa sách.
-* **Tối ưu hóa bộ đệm Streaming ảnh JPEG/PNG (Chống OOM trên X3):**
-  * Tinh gọn bộ đệm hàng (band buffer) từ 24KB xuống 8KB trên các chip không có PSRAM (ESP32-C3).
-  * Bổ sung cơ chế tự động thu hẹp bộ đệm theo kích thước MCU block (`maxBlockDstRows + 2`, ~3.6KB) khi bộ nhớ heap hạn hẹp, ngăn chặn 100% tình trạng sập nguồn (OOM crash) hoặc đơ máy (watchdog reset) khi mở sách có ảnh phân giải cao.
-* **Xoay chuẩn hướng Logo khởi động:** Điều chỉnh quét ma trận ảnh logo 90° CCW tương thích chuẩn quét dọc (portrait panel scan) của phần cứng.
+### Phiên bản v0.12
+* **Nâng cấp thuật toán Dithering & Độ tương phản E-Ink:**
+  * **Ma trận 8x8 Fine Bayer:** Thay thế ma trận Bayer 4x4 cũ bằng ma trận 8x8 (64 mức sắc độ mịn), khử sạch hiện tượng sọc caro và mắt lưới thô trên hình ảnh.
+  * **E-Ink Optical Clamping:** Ép ngưỡng đen (`<= 45`) về đen đặc (0) và ép ngưỡng trắng (`>= 225`) về trắng tinh (3). Loại bỏ hoàn toàn các chấm dither li ti bẩn nền giấy, giữ viền chữ và nét vẽ manga đậm nét tương tự firmware stock.
+  * **Hiệu chỉnh tương phản bìa sách:** Bật bộ lọc Gamma Correction và tăng 20% tương phản (`CONTRAST_FACTOR = 1.20f`) trong `BitmapHelpers.cpp` cho các bìa sách tạo từ thẻ SD.
+* **Cơ chế chống tràn RAM (OOM Guard trên X3):**
+  * Tinh gọn trần bộ đệm hàng (`MAX_BAND_BYTES`) từ 24KB xuống 8KB cho vi điều khiển không có PSRAM (ESP32-C3).
+  * Bổ sung cơ chế tự động thu hẹp bộ đệm xuống kích thước tối thiểu của một khối MCU (`maxBlockDstRows + 2`, ~3.6KB) khi heap bị phân mảnh, ngăn chặn sập nguồn (OOM) hoặc đơ máy (watchdog reset) khi mở sách có ảnh kích thước lớn.
+* **Bổ sung hỗ trợ Xteink X4 Pro:**
+  * Xuất bản chính thức firmware `crossimple_x4-pro_v0.12.bin` hỗ trợ đầy đủ màn hình cảm ứng điện dung, phím Home cảm ứng và đèn nền 2 màu Warm/Cool PWM.
+
+---
+
+### Phiên bản v0.11
+* **Tái định vị thương hiệu CrossImple (Pure Reader):**
+  * Gỡ bỏ hoàn toàn module Virtual Pet (>3.800 dòng code), đưa firmware về trạng thái thuần khiết 100% phục vụ đọc sách, không còn bất kỳ tiến trình hay timer ngầm nào, đưa mức RAM tĩnh trên X3 về mức tối ưu 19.8%.
+* **Bộ nhận diện & Màn hình khởi động mới (Bunny Reader):**
+  * Tích hợp logo chú thỏ ngồi đọc sách đơn sắc độ phân giải cao, khử sạch watermark.
+  * Tinh chỉnh quét ma trận ảnh logo xoay 90° CCW tương thích chuẩn quét dọc (portrait panel scan) của phần cứng.
+  * Chuẩn hóa dòng chữ phiên bản khởi động: hiển thị gọn gàng `CrossImple <version>` thay vì chuỗi build gốc của upstream.
+* **Chuẩn hóa đặt tên file Firmware xuất ra:**
+  * Quy chuẩn định dạng file build tự động: `crossimple_<mã máy>_<version>.bin`.
+  * Hỗ trợ chính thức **Xteink X3** và **Xteink X4 Classic**.
 
 ---
 
